@@ -14,7 +14,7 @@ layout (location = 0) out vec3 wpos;
 layout (location = 1) out vec3 normal;
 layout (location = 2) out vec2 texcoord;
 
-layout(std140, binding = 0) uniform buf
+layout(set = 0, binding = 0) uniform buf
 {
 	mat4 MVP;
 	mat4 Model;

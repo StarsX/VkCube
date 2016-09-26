@@ -16,10 +16,14 @@ namespace XSVK
 		Pipeline(const VkDevice pVkDevice);
 		virtual ~Pipeline();
 
-		void Create(const VkDescriptorSetLayout &pVkDescLayout,
-			const VkRenderPass &pVkRenderPass);
+		void Create(const VkRenderPass &pVkRenderPass,
+			const vVkDescriptorSetLayout &vVkDescLayouts);
+		void Create(const VkRenderPass pVkRenderPass,
+			const pVkDescriptorSetLayout pVkDescLayouts,
+			const uint8_t uNum = 1ui8);
 		void Create(const VkRenderPass &pVkRenderPass);
-		void CreateLayout(const VkDescriptorSetLayout &pVkDescLayout);
+		void CreateLayout(const pVkDescriptorSetLayout pVkDescLayouts,
+			const uint8_t uNum);
 
 		void AttachShader(const VkPipelineShaderStageCreateInfo &vkShader);
 

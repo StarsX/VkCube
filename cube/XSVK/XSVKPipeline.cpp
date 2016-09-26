@@ -68,11 +68,10 @@ Pipeline::~Pipeline()
 	Reset();
 }
 
-void Pipeline::Create(
-	const VkDescriptorSetLayout &pVkDescLayout,
-	const VkRenderPass &pVkRenderPass)
+void Pipeline::Create(const VkRenderPass &pVkRenderPass,
+	const vVkDescriptorSetLayout &vVkDescLayouts)
 {
-	CreateLayout(pVkDescLayout);
+	CreateLayout(vVkDescLayouts.data(), uint8_t(vVkDescLayouts.size()));
 	Create(pVkRenderPass);
 }
 
@@ -130,7 +129,8 @@ void Pipeline::Create(const VkRenderPass &pVkRenderPass)
 	assert(!err);
 }
 
-void Pipeline::CreateLayout(const VkDescriptorSetLayout &pVkDescLayout)
+void Pipeline::CreateLayout(const pVkDescriptorSetLayout pVkDescLayouts,
+	const uint8_t uNum)
 {
 	VkResult U_ASSERT_ONLY err;
 
@@ -139,8 +139,8 @@ void Pipeline::CreateLayout(const VkDescriptorSetLayout &pVkDescLayout)
 		VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,			//.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 		nullptr,												//.pNext = NULL,
 		0u,														//.flags = 0,
-		1u,														//.setLayoutCount = 1,
-		&pVkDescLayout											//.pSetLayouts = &demo->desc_layout,
+		uNum,													//.setLayoutCount = 1,
+		pVkDescLayouts											//.pSetLayouts = &demo->desc_layout,
 	};
 
 	err = vkCreatePipelineLayout(m_pVkDevice, &pipelineLayoutCreateInfo, nullptr,

@@ -10,17 +10,17 @@ layout (location = 0) in vec2 texcoord;
 
 layout (location = 0) out vec4 uFragColor;
 
-layout (std140, binding = 0) uniform buf
+layout (set = 0, binding = 0) uniform buf
 {
 	vec3 lightPos;
 	vec3 eyePos;
 } lightBuf;
 
-//layout (binding = 1) uniform sampler2D txDiffuse;
-//layout (binding = 2) uniform sampler2D txNormal;
-layout (binding = 1) uniform sampler samp;
-layout (binding = 2) uniform texture2D txDiffuse;
-layout (binding = 3) uniform texture2D txNormal;
+//layout (set = 0, binding = 1) uniform sampler2D txDiffuse;
+//layout (set = 0, binding = 2) uniform sampler2D txNormal;
+layout (set = 0, binding = 1) uniform sampler samp;
+layout (set = 0, binding = 2) uniform texture2D txDiffuse;
+layout (set = 0, binding = 3) uniform texture2D txNormal;
 
 void main()
 {

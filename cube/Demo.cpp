@@ -242,7 +242,7 @@ void Demo::Render()
 		vkCmdBindDescriptorSets(pVkCmd,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			pPipeline->GetLayout(), 0u, 1u,
-			&pDescriptor->Get(), 0u, nullptr);
+			pDescriptor->Get(), 0u, nullptr);
 
 		VkDeviceSize uOffsets[1] = { 0 };
 		vkCmdBindVertexBuffers(pVkCmd, 0u, 1u,
@@ -281,7 +281,7 @@ void Demo::Render()
 		vkCmdBindDescriptorSets(pVkCmd,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			pPipeline->GetLayout(), 0u, 1u,
-			&pDescriptor->Get(), 0u, nullptr);
+			pDescriptor->Get(), 0u, nullptr);
 
 		vkCmdDraw(pVkCmd, 3u, 1u, 0u, 0u);
 		vkCmdEndRenderPass(pVkCmd);
@@ -638,12 +638,12 @@ void Demo::createPipelines()
 		auto &pDescSet = m_ppDescSets[0];
 		pDescSet = make_unique<DescSet>(m_pContext->GetDevice());
 		assert(pDescSet);
-		pDescSet->AttachBuffers(1ui8, &m_pUMatrices,
+		pDescSet->AttachBuffers(0ui8, 1ui8, &m_pUMatrices,
 			VK_SHADER_STAGE_VERTEX_BIT);
-		pDescSet->AttachTextures(1ui8,
+		pDescSet->AttachTextures(0ui8, 1ui8,
 			&m_pSampler, VK_SHADER_STAGE_FRAGMENT_BIT,
 			VK_DESCRIPTOR_TYPE_SAMPLER);
-		pDescSet->AttachTextures(DEMO_TEXTURE_COUNT,
+		pDescSet->AttachTextures(0ui8, DEMO_TEXTURE_COUNT,
 			m_vpTextures.data(), VK_SHADER_STAGE_FRAGMENT_BIT,
 			VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
 		//pDescSet->AttachTextures(DEMO_TEXTURE_COUNT,
@@ -671,7 +671,7 @@ void Demo::createPipelines()
 
 		pPipeline->OMAttachBlend();
 
-		pPipeline->Create(pDescSet->GetLayout(), pRenderpass->Get());
+		pPipeline->Create(pRenderpass->Get(), pDescSet->GetLayouts());
 	}
 
 	// Shading pass
@@ -679,15 +679,15 @@ void Demo::createPipelines()
 		auto &pDescSet = m_ppDescSets[1];
 		pDescSet = make_unique<DescSet>(m_pContext->GetDevice());
 		assert(pDescSet);
-		pDescSet->AttachBuffers(1ui8, &m_pULight,
+		pDescSet->AttachBuffers(0ui8, 1ui8, &m_pULight,
 			VK_SHADER_STAGE_FRAGMENT_BIT);
-		pDescSet->AttachTextures(1ui8,
+		pDescSet->AttachTextures(0ui8, 1ui8,
 			&m_pSampler, VK_SHADER_STAGE_FRAGMENT_BIT,
 			VK_DESCRIPTOR_TYPE_SAMPLER);
-		pDescSet->AttachTextures(1ui8,
+		pDescSet->AttachTextures(0ui8, 1ui8,
 			&m_ppGBuffers[0], VK_SHADER_STAGE_FRAGMENT_BIT,
 			VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
-		pDescSet->AttachTextures(1ui8,
+		pDescSet->AttachTextures(0ui8, 1ui8,
 			&m_ppGBuffers[1], VK_SHADER_STAGE_FRAGMENT_BIT,
 			VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
 		//pDescSet->AttachTextures(1ui8,
@@ -711,7 +711,7 @@ void Demo::createPipelines()
 			VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
 		pPipeline->OMSetBlendAlpha(0ui8, VK_BLEND_FACTOR_ONE,
 			VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
-		pPipeline->Create(pDescSet->GetLayout(), pRenderpass->Get());
+		pPipeline->Create(pRenderpass->Get(), pDescSet->GetLayouts());
 	}
 }
 

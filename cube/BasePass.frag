@@ -12,9 +12,9 @@ layout (location = 2) in vec2 texcoord;
 
 layout (location = 0) out vec4 uFragColor[2];
 
-//layout (binding = 1) uniform sampler2D tex;
-layout (binding = 1) uniform sampler samp;
-layout (binding = 2) uniform texture2D tex;
+//layout (set = 0, binding = 1) uniform sampler2D tex;
+layout (set = 0, binding = 1) uniform sampler samp;
+layout (set = 0, binding = 2) uniform texture2D tex;
 
 void main()
 {
