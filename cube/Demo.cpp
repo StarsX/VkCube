@@ -638,17 +638,19 @@ void Demo::createPipelines()
 		auto &pDescSet = m_ppDescSets[0];
 		pDescSet = make_unique<DescSet>(m_pContext->GetDevice());
 		assert(pDescSet);
-		pDescSet->AttachBuffers(0ui8, 1ui8, &m_pUMatrices,
+		pDescSet->AttachBindings(0ui8, 1ui8,
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			VK_SHADER_STAGE_VERTEX_BIT);
-		pDescSet->AttachTextures(0ui8, 1ui8,
-			&m_pSampler, VK_SHADER_STAGE_FRAGMENT_BIT,
-			VK_DESCRIPTOR_TYPE_SAMPLER);
-		pDescSet->AttachTextures(0ui8, DEMO_TEXTURE_COUNT,
-			m_vpTextures.data(), VK_SHADER_STAGE_FRAGMENT_BIT,
-			VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
-		//pDescSet->AttachTextures(DEMO_TEXTURE_COUNT,
-		//	m_vpTextures.data(), VK_SHADER_STAGE_FRAGMENT_BIT);
+		pDescSet->AttachBindings(0ui8, 1ui8,
+			VK_DESCRIPTOR_TYPE_SAMPLER,
+			VK_SHADER_STAGE_FRAGMENT_BIT);
+		pDescSet->AttachBindings(0ui8, DEMO_TEXTURE_COUNT,
+			VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+			VK_SHADER_STAGE_FRAGMENT_BIT);
 		pDescSet->Create();
+		pDescSet->SetBuffers(0ui8, 0ui8, &m_pUMatrices);
+		pDescSet->SetTextures(0ui8, 1ui8, &m_pSampler);
+		pDescSet->SetTextures(0ui8, 2ui8, m_vpTextures.data());
 
 		auto &pRenderpass = m_ppRenderPasses[0];
 		pRenderpass = make_unique<RenderPass>(m_pContext->GetDevice());
@@ -679,22 +681,22 @@ void Demo::createPipelines()
 		auto &pDescSet = m_ppDescSets[1];
 		pDescSet = make_unique<DescSet>(m_pContext->GetDevice());
 		assert(pDescSet);
-		pDescSet->AttachBuffers(0ui8, 1ui8, &m_pULight,
+		pDescSet->AttachBindings(0ui8, 1ui8,
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			VK_SHADER_STAGE_FRAGMENT_BIT);
-		pDescSet->AttachTextures(0ui8, 1ui8,
-			&m_pSampler, VK_SHADER_STAGE_FRAGMENT_BIT,
-			VK_DESCRIPTOR_TYPE_SAMPLER);
-		pDescSet->AttachTextures(0ui8, 1ui8,
-			&m_ppGBuffers[0], VK_SHADER_STAGE_FRAGMENT_BIT,
-			VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
-		pDescSet->AttachTextures(0ui8, 1ui8,
-			&m_ppGBuffers[1], VK_SHADER_STAGE_FRAGMENT_BIT,
-			VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
-		//pDescSet->AttachTextures(1ui8,
-		//	&m_ppGBuffers[0], VK_SHADER_STAGE_FRAGMENT_BIT);
-		//pDescSet->AttachTextures(1ui8,
-		//	&m_ppGBuffers[1], VK_SHADER_STAGE_FRAGMENT_BIT);
+		pDescSet->AttachBindings(0ui8, 1ui8,
+			VK_DESCRIPTOR_TYPE_SAMPLER,
+			VK_SHADER_STAGE_FRAGMENT_BIT);
+		pDescSet->AttachBindings(0ui8, 1ui8,
+			VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+			VK_SHADER_STAGE_FRAGMENT_BIT);
+		pDescSet->AttachBindings(0ui8, 1ui8,
+			VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+			VK_SHADER_STAGE_FRAGMENT_BIT);
 		pDescSet->Create();
+		pDescSet->SetBuffers(0ui8, 0ui8, &m_pULight);
+		pDescSet->SetTextures(0ui8, 1ui8, &m_pSampler);
+		pDescSet->SetTextures(0ui8, 2ui8, 2ui8, m_ppGBuffers);
 
 		auto &pRenderpass = m_ppRenderPasses[1];
 		pRenderpass = make_unique<RenderPass>(m_pContext->GetDevice());

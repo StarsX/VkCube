@@ -32,28 +32,26 @@ namespace XSVK
 		void CreateDescPool();
 		void CreateDescLayouts();
 		void CreateDescSets();
-		void Update();
 		void Reset();
 
-		void SetNumBindings(const uint8_t s, const uint8_t uNum);
-		void SetBuffers(const uint8_t s, const uint8_t i, const uint8_t uNum,
-			const ppBuffer ppBuffers, const VkShaderStageFlags vkStage = 0,
-			const VkDescriptorType vkType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-		void AttachBuffers(const uint8_t s, const uint8_t uNum,
-			const ppBuffer ppBuffers, const VkShaderStageFlags vkStage,
-			const VkDescriptorType vkType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-		void SetTextures(const uint8_t s, const uint8_t i, const uint8_t uNum,
-			const ppTexture ppTextures, const VkShaderStageFlags vkStage = 0,
-			const VkDescriptorType vkType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-		void SetTextures(const uint8_t s, const uint8_t i, const uint8_t uNum,
-			const ppImage ppTextures, const VkShaderStageFlags vkStage = 0,
-			const VkDescriptorType vkType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-		void AttachTextures(const uint8_t s, const uint8_t uNum,
-			const ppTexture ppTextures, const VkShaderStageFlags vkStage,
-			const VkDescriptorType vkType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-		void AttachTextures(const uint8_t s, const uint8_t uNum,
-			const ppImage ppTextures, const VkShaderStageFlags vkStage,
-			const VkDescriptorType vkType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+		void SetNumBindings(const uint8_t uSet, const uint8_t uNum);
+		void AttachBindings(const uint8_t uSet, const uint8_t uNum,
+			const VkDescriptorType vkType, const VkShaderStageFlags vkStage);
+		void SetBindings(const uint8_t uSet, const uint8_t uBinding,
+			const uint8_t uNum, const VkDescriptorType vkType,
+			const VkShaderStageFlags vkStage);
+		void SetBuffers(const uint8_t uSet, const uint8_t uBinding,
+			const ppBuffer ppBuffers);
+		void SetBuffers(const uint8_t uSet, const uint8_t uStart,
+			const uint8_t uCount, const ppBuffer ppBuffers);
+		void SetTextures(const uint8_t uSet, const uint8_t uBinding,
+			const ppTexture ppTextures);
+		void SetTextures(const uint8_t uSet, const uint8_t uBinding,
+			const ppImage ppTextures);
+		void SetTextures(const uint8_t uSet, const uint8_t uStart,
+			const uint8_t uCount, const ppTexture ppTextures);
+		void SetTextures(const uint8_t uSet, const uint8_t uStart,
+			const uint8_t uCount, const ppImage ppTextures);
 
 		const pVkDescriptorSet			Get() const;
 		const vVkDescriptorSetLayout	&GetLayouts() const;
@@ -63,11 +61,8 @@ namespace XSVK
 		using vVkDescriptorSet = std::vector<VkDescriptorSet>;
 		using vVkDescriptorSetLayoutBinding = std::vector<VkDescriptorSetLayoutBinding>;
 		using vvVkDescriptorSetLayoutBinding = std::vector<vVkDescriptorSetLayoutBinding>;
-		using vVkWriteDescriptorSet = std::vector<VkWriteDescriptorSet>;
-		using vVkDescriptorBufferInfo = std::vector<VkDescriptorBufferInfo>;
-		using vvVkDescriptorBufferInfo = std::vector<vVkDescriptorBufferInfo>;
-		using vVkDescriptorImageInfo = std::vector<VkDescriptorImageInfo>;
-		using vvVkDescriptorImageInfo = std::vector<vVkDescriptorImageInfo>;
+		//using vVkDescriptorBufferInfo = std::vector<VkDescriptorBufferInfo>;
+		//using vVkDescriptorImageInfo = std::vector<VkDescriptorImageInfo>;
 
 		void setBindings(const uint8_t s, const uint8_t i, const uint8_t uNum,
 			const VkShaderStageFlags vkStage, const VkDescriptorType vkType);
@@ -78,10 +73,6 @@ namespace XSVK
 		vVkDescriptorSet				m_vVkDescSets;
 
 		vvVkDescriptorSetLayoutBinding	m_vvVkBindings;
-		vVkWriteDescriptorSet			m_vVkWrites;
-
-		vvVkDescriptorBufferInfo		m_vvBufferDesc;
-		vvVkDescriptorImageInfo			m_vvImageDesc;
 
 		const VkDevice	m_pVkDevice;
 	};
