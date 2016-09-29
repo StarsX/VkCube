@@ -18,9 +18,9 @@ layout (set = 0, binding = 0) uniform buf
 
 //layout (set = 0, binding = 1) uniform sampler2D txDiffuse;
 //layout (set = 0, binding = 2) uniform sampler2D txNormal;
-layout (set = 0, binding = 1) uniform sampler samp;
-layout (set = 0, binding = 2) uniform texture2D txDiffuse;
-layout (set = 0, binding = 3) uniform texture2D txNormal;
+layout (set = 1, binding = 0) uniform sampler samp;
+layout (set = 2, binding = 0) uniform texture2D txDiffuse;
+layout (set = 2, binding = 1) uniform texture2D txNormal;
 
 void main()
 {

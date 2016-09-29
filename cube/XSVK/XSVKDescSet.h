@@ -36,10 +36,12 @@ namespace XSVK
 
 		void SetNumBindings(const uint8_t uSet, const uint8_t uNum);
 		void AttachBindings(const uint8_t uSet, const uint8_t uNum,
-			const VkDescriptorType vkType, const VkShaderStageFlags vkStage);
-		void SetBindings(const uint8_t uSet, const uint8_t uBinding,
+			const VkDescriptorType vkType, const VkShaderStageFlags vkStage,
+			const bool bSeparate = false);
+		void SetBindings(const uint8_t uSet, const uint8_t uStart,
 			const uint8_t uNum, const VkDescriptorType vkType,
-			const VkShaderStageFlags vkStage);
+			const VkShaderStageFlags vkStage,
+			const bool bSeparate = false);
 		void SetBuffers(const uint8_t uSet, const uint8_t uBinding,
 			const ppBuffer ppBuffers);
 		void SetBuffers(const uint8_t uSet, const uint8_t uStart,
@@ -61,11 +63,6 @@ namespace XSVK
 		using vVkDescriptorSet = std::vector<VkDescriptorSet>;
 		using vVkDescriptorSetLayoutBinding = std::vector<VkDescriptorSetLayoutBinding>;
 		using vvVkDescriptorSetLayoutBinding = std::vector<vVkDescriptorSetLayoutBinding>;
-		//using vVkDescriptorBufferInfo = std::vector<VkDescriptorBufferInfo>;
-		//using vVkDescriptorImageInfo = std::vector<VkDescriptorImageInfo>;
-
-		void setBindings(const uint8_t s, const uint8_t i, const uint8_t uNum,
-			const VkShaderStageFlags vkStage, const VkDescriptorType vkType);
 
 		VkDescriptorPool				m_VkDescPool;
 

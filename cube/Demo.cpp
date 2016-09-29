@@ -17,6 +17,14 @@
 using namespace std;
 using namespace XSVK;
 
+enum DescSetIndex : uint8_t
+{
+	UBUFFER_SET,
+	SAMPLER_SET,
+	TEXTURE_SET,
+	NUM_DESC_SET
+};
+
 static char *g_txFiles[] = { "lunarg.pfm" };
 
 static const float g_vertex_buffer_data[] =
@@ -225,9 +233,9 @@ void Demo::Render()
 			{ 1.0f, 0u }
 		};
 
-		const auto &pDescriptor = m_ppDescSets[0];
-		const auto &pRenderpass = m_ppRenderPasses[0];
-		const auto &pPipeline = m_ppPipelines[0];
+		const auto &pDescSet = m_ppDescSets[BASE_PASS];
+		const auto &pRenderpass = m_ppRenderPasses[BASE_PASS];
+		const auto &pPipeline = m_ppPipelines[BASE_PASS];
 
 		pRenderpass->SetFramebuffer(m_pGBuffer->Get());
 		pRenderpass->SetRenderArea(m_uWidth, m_uHeight);
@@ -241,8 +249,10 @@ void Demo::Render()
 			pPipeline->Get());
 		vkCmdBindDescriptorSets(pVkCmd,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			pPipeline->GetLayout(), 0u, 1u,
-			pDescriptor->Get(), 0u, nullptr);
+			pPipeline->GetLayout(), 0u, NUM_DESC_SET,
+			pDescSet->Get(), 0u, nullptr);
+
+		pDescSet->SetTextures(TEXTURE_SET, 0ui8, m_vpTextures.data());
 
 		VkDeviceSize uOffsets[1] = { 0 };
 		vkCmdBindVertexBuffers(pVkCmd, 0u, 1u,
@@ -263,9 +273,9 @@ void Demo::Render()
 		const VkClearValue clear_value =
 		{ 0.2f, 0.2f, 0.2f, 0.2f };
 
-		const auto &pDescriptor = m_ppDescSets[1];
-		const auto &pRenderpass = m_ppRenderPasses[1];
-		const auto &pPipeline = m_ppPipelines[1];
+		const auto &pDescSet = m_ppDescSets[SHADE_PASS];
+		const auto &pRenderpass = m_ppRenderPasses[SHADE_PASS];
+		const auto &pPipeline = m_ppPipelines[SHADE_PASS];
 
 		pRenderpass->SetFramebuffer(
 			m_vpFramebuffers[m_pContext->GetCurBuffer()]->Get());
@@ -280,8 +290,10 @@ void Demo::Render()
 			pPipeline->Get());
 		vkCmdBindDescriptorSets(pVkCmd,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			pPipeline->GetLayout(), 0u, 1u,
-			pDescriptor->Get(), 0u, nullptr);
+			pPipeline->GetLayout(), 0u, NUM_DESC_SET,
+			pDescSet->Get(), 0u, nullptr);
+
+		pDescSet->SetTextures(TEXTURE_SET, 0ui8, 2ui8, m_ppGBuffers);
 
 		vkCmdDraw(pVkCmd, 3u, 1u, 0u, 0u);
 		vkCmdEndRenderPass(pVkCmd);
@@ -635,24 +647,23 @@ void Demo::createPipelines()
 {
 	// Base pass (G-buffers)
 	{
-		auto &pDescSet = m_ppDescSets[0];
+		auto &pDescSet = m_ppDescSets[BASE_PASS];
 		pDescSet = make_unique<DescSet>(m_pContext->GetDevice());
 		assert(pDescSet);
-		pDescSet->AttachBindings(0ui8, 1ui8,
+		pDescSet->AttachBindings(UBUFFER_SET, 1ui8,
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			VK_SHADER_STAGE_VERTEX_BIT);
-		pDescSet->AttachBindings(0ui8, 1ui8,
+		pDescSet->AttachBindings(SAMPLER_SET, 1ui8,
 			VK_DESCRIPTOR_TYPE_SAMPLER,
 			VK_SHADER_STAGE_FRAGMENT_BIT);
-		pDescSet->AttachBindings(0ui8, DEMO_TEXTURE_COUNT,
+		pDescSet->AttachBindings(TEXTURE_SET, DEMO_TEXTURE_COUNT,
 			VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
 			VK_SHADER_STAGE_FRAGMENT_BIT);
 		pDescSet->Create();
-		pDescSet->SetBuffers(0ui8, 0ui8, &m_pUMatrices);
-		pDescSet->SetTextures(0ui8, 1ui8, &m_pSampler);
-		pDescSet->SetTextures(0ui8, 2ui8, m_vpTextures.data());
+		pDescSet->SetBuffers(UBUFFER_SET, 0ui8, &m_pUMatrices);
+		pDescSet->SetTextures(SAMPLER_SET, 0ui8, &m_pSampler);
 
-		auto &pRenderpass = m_ppRenderPasses[0];
+		auto &pRenderpass = m_ppRenderPasses[BASE_PASS];
 		pRenderpass = make_unique<RenderPass>(m_pContext->GetDevice());
 		assert(pRenderpass);
 		pRenderpass->AttachColorBuffer(m_ppGBuffers[0]);
@@ -660,7 +671,7 @@ void Demo::createPipelines()
 		pRenderpass->SetDepthBuffer(m_pDepth);
 		pRenderpass->Create();
 
-		auto &pPipeline = m_ppPipelines[0];
+		auto &pPipeline = m_ppPipelines[BASE_PASS];
 		pPipeline = make_unique<Pipeline>(m_pContext->GetDevice());
 		assert(pPipeline);
 		pPipeline->AttachShader(m_pShader->GetVertexShader(0ui8));
@@ -678,33 +689,29 @@ void Demo::createPipelines()
 
 	// Shading pass
 	{
-		auto &pDescSet = m_ppDescSets[1];
+		auto &pDescSet = m_ppDescSets[SHADE_PASS];
 		pDescSet = make_unique<DescSet>(m_pContext->GetDevice());
 		assert(pDescSet);
-		pDescSet->AttachBindings(0ui8, 1ui8,
+		pDescSet->AttachBindings(UBUFFER_SET, 1ui8,
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			VK_SHADER_STAGE_FRAGMENT_BIT);
-		pDescSet->AttachBindings(0ui8, 1ui8,
+		pDescSet->AttachBindings(SAMPLER_SET, 1ui8,
 			VK_DESCRIPTOR_TYPE_SAMPLER,
 			VK_SHADER_STAGE_FRAGMENT_BIT);
-		pDescSet->AttachBindings(0ui8, 1ui8,
+		pDescSet->AttachBindings(TEXTURE_SET, 2ui8,
 			VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-			VK_SHADER_STAGE_FRAGMENT_BIT);
-		pDescSet->AttachBindings(0ui8, 1ui8,
-			VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-			VK_SHADER_STAGE_FRAGMENT_BIT);
+			VK_SHADER_STAGE_FRAGMENT_BIT, true);
 		pDescSet->Create();
-		pDescSet->SetBuffers(0ui8, 0ui8, &m_pULight);
-		pDescSet->SetTextures(0ui8, 1ui8, &m_pSampler);
-		pDescSet->SetTextures(0ui8, 2ui8, 2ui8, m_ppGBuffers);
+		pDescSet->SetBuffers(UBUFFER_SET, 0ui8, &m_pULight);
+		pDescSet->SetTextures(SAMPLER_SET, 0ui8, &m_pSampler);
 
-		auto &pRenderpass = m_ppRenderPasses[1];
+		auto &pRenderpass = m_ppRenderPasses[SHADE_PASS];
 		pRenderpass = make_unique<RenderPass>(m_pContext->GetDevice());
 		assert(pRenderpass);
 		pRenderpass->AttachColorBuffer(m_pContext->GetFormat());
 		pRenderpass->Create();
 
-		auto &pPipeline = m_ppPipelines[1];
+		auto &pPipeline = m_ppPipelines[SHADE_PASS];
 		pPipeline = make_unique<Pipeline>(m_pContext->GetDevice());
 		assert(pPipeline);
 		pPipeline->AttachShader(m_pShader->GetVertexShader(1ui8));
@@ -722,7 +729,7 @@ void Demo::createFramebuffers()
 	m_pGBuffer = make_unique<Framebuffer>(m_pContext->GetDevice());
 	assert(m_pGBuffer);
 	m_pGBuffer->SetDimensions(m_uWidth, m_uHeight);
-	m_pGBuffer->SetRenderPass(m_ppRenderPasses[0]->Get());
+	m_pGBuffer->SetRenderPass(m_ppRenderPasses[BASE_PASS]->Get());
 	m_pGBuffer->SetColorBuffers(m_ppGBuffers, 2ui8);
 	m_pGBuffer->SetDepthBuffer(m_pDepth);
 	m_pGBuffer->Create();
@@ -738,7 +745,7 @@ void Demo::createFramebuffers()
 		m_vpFramebuffers[i] = make_unique<Framebuffer>(m_pContext->GetDevice());
 		assert(m_vpFramebuffers[i]);
 		m_vpFramebuffers[i]->SetDimensions(m_uWidth, m_uHeight);
-		m_vpFramebuffers[i]->SetRenderPass(m_ppRenderPasses[1]->Get());
+		m_vpFramebuffers[i]->SetRenderPass(m_ppRenderPasses[SHADE_PASS]->Get());
 		m_vpFramebuffers[i]->AttachColorBuffer(vpBuffers[i]);
 		m_vpFramebuffers[i]->Create();
 	}

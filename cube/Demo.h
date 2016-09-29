@@ -5,6 +5,13 @@
 class Demo
 {
 public:
+	enum ShaderPass
+	{
+		BASE_PASS,
+		SHADE_PASS,
+		NUM_PASS
+	};
+
 	struct vktexcube_vb
 	{
 		float position[3];
@@ -52,9 +59,9 @@ protected:
 	std::unique_ptr<XSVK::ImageBuffer>					m_pSampler;
 
 	std::unique_ptr<XSVK::Shader>						m_pShader;
-	std::unique_ptr<XSVK::DescSet>						m_ppDescSets[2];
-	std::unique_ptr<XSVK::RenderPass>					m_ppRenderPasses[2];
-	std::unique_ptr<XSVK::Pipeline>						m_ppPipelines[2];
+	std::unique_ptr<XSVK::DescSet>						m_ppDescSets[NUM_PASS];
+	std::unique_ptr<XSVK::RenderPass>					m_ppRenderPasses[NUM_PASS];
+	std::unique_ptr<XSVK::Pipeline>						m_ppPipelines[NUM_PASS];
 
 	std::vector<std::unique_ptr<XSVK::Framebuffer>>		m_vpFramebuffers;
 	std::unique_ptr<XSVK::Framebuffer>					m_pGBuffer;

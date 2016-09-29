@@ -37,7 +37,13 @@ void DescSet::CreateDescPool()
 	vector<VkDescriptorPoolSize> vVkDescPoolSizes(0);
 	for (const auto &vVkBindings : m_vvVkBindings)
 		for (const auto &vkBinding : vVkBindings)
-			vVkDescPoolSizes.push_back({ vkBinding.descriptorType, vkBinding.descriptorCount });
+		{
+			if (vVkDescPoolSizes.size() > 0 &&
+				vVkDescPoolSizes.back().type == vkBinding.descriptorType)
+				vVkDescPoolSizes.back().descriptorCount += vkBinding.descriptorCount;
+			else
+				vVkDescPoolSizes.push_back({ vkBinding.descriptorType, vkBinding.descriptorCount });
+		}
 
 	const VkDescriptorPoolCreateInfo descPool =
 	{
@@ -119,32 +125,50 @@ void DescSet::SetNumBindings(const uint8_t uSet, const uint8_t uNum)
 }
 
 void DescSet::AttachBindings(const uint8_t uSet, const uint8_t uNum,
-	const VkDescriptorType vkType, const VkShaderStageFlags vkStage)
+	const VkDescriptorType vkType, const VkShaderStageFlags vkStage,
+	const bool bSeparate)
 {
 	if (uint8_t(m_vvVkBindings.size()) < uSet + 1ui8)
 		m_vvVkBindings.resize(uSet + 1);
 
-	const auto vkBinding = VkDescriptorSetLayoutBinding
+	const auto uNumBinding = bSeparate ? uNum : 1u;
+	const auto uNumDesc = bSeparate ? 1u : uNum;
+
+	for (auto i = 0ui8; i < uNumBinding; ++i)
 	{
-		uint32_t(m_vvVkBindings[uSet].size()),	//.binding = 0,
-		vkType,									//.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-		uNum,									//.descriptorCount = 1,
-		vkStage,								//.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-		nullptr									//.pImmutableSamplers = NULL,
-	};
-	m_vvVkBindings[uSet].push_back(vkBinding);
-	assert(m_vvVkBindings[uSet].data());
+		const auto &vkLastBinding = m_vvVkBindings[uSet].back();
+		const auto uBinding = m_vvVkBindings[uSet].size() > 0 ?
+			vkLastBinding.binding + vkLastBinding.descriptorCount : 0u;
+
+		const auto vkBinding = VkDescriptorSetLayoutBinding
+		{
+			uBinding,	//.binding = 0,
+			vkType,		//.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			uNumDesc,	//.descriptorCount = 1,
+			vkStage,	//.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+			nullptr		//.pImmutableSamplers = NULL,
+		};
+		m_vvVkBindings[uSet].push_back(vkBinding);
+		assert(m_vvVkBindings[uSet].data());
+	}
 }
 
-void XSVK::DescSet::SetBindings(const uint8_t uSet, const uint8_t uBinding,
+void XSVK::DescSet::SetBindings(const uint8_t uSet, const uint8_t uStart,
 	const uint8_t uNum, const VkDescriptorType vkType,
-	const VkShaderStageFlags vkStage)
+	const VkShaderStageFlags vkStage, const bool bSeparate)
 {
-	m_vvVkBindings[uSet][uBinding].binding = uBinding;
-	m_vvVkBindings[uSet][uBinding].descriptorType = vkType;
-	m_vvVkBindings[uSet][uBinding].descriptorCount = uNum;
-	m_vvVkBindings[uSet][uBinding].stageFlags = vkStage;
-	m_vvVkBindings[uSet][uBinding].pImmutableSamplers = nullptr;
+	const auto uNumBinding = bSeparate ? uNum : 1u;
+	const auto uNumDesc = bSeparate ? 1u : uNum;
+
+	for (auto i = 0ui8; i < uNumBinding; ++i)
+	{
+		const auto uBinding = uStart + i;
+		m_vvVkBindings[uSet][uBinding].binding = uBinding;
+		m_vvVkBindings[uSet][uBinding].descriptorType = vkType;
+		m_vvVkBindings[uSet][uBinding].descriptorCount = uNumDesc;
+		m_vvVkBindings[uSet][uBinding].stageFlags = vkStage;
+		m_vvVkBindings[uSet][uBinding].pImmutableSamplers = nullptr;
+	}
 }
 
 void XSVK::DescSet::SetBuffers(const uint8_t uSet, const uint8_t uBinding,
@@ -336,17 +360,4 @@ const VkDescriptorSet &DescSet::Get(const uint8_t i) const
 const VkDescriptorSetLayout &DescSet::GetLayout(const uint8_t i) const
 {
 	return m_vVkDescLayouts[i];
-}
-
-void XSVK::DescSet::setBindings(const uint8_t s, const uint8_t i, const uint8_t uNum,
-	const VkShaderStageFlags vkStage, const VkDescriptorType vkType)
-{
-	if (vkStage)
-	{
-		m_vvVkBindings[s][i].descriptorType = vkType;
-		m_vvVkBindings[s][i].binding = i;
-		m_vvVkBindings[s][i].descriptorCount = uNum;
-		m_vvVkBindings[s][i].stageFlags = vkStage;
-		m_vvVkBindings[s][i].pImmutableSamplers = nullptr;
-	}
 }
