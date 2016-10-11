@@ -34,13 +34,8 @@ namespace XSVK
 		void CreateDescSets();
 		void Reset();
 
-		void SetNumBindings(const uint8_t uSet, const uint8_t uNum);
 		void AttachBindings(const uint8_t uSet, const uint8_t uNum,
 			const VkDescriptorType vkType, const VkShaderStageFlags vkStage,
-			const bool bSeparate = false);
-		void SetBindings(const uint8_t uSet, const uint8_t uStart,
-			const uint8_t uNum, const VkDescriptorType vkType,
-			const VkShaderStageFlags vkStage,
 			const bool bSeparate = false);
 		void SetBuffers(const uint8_t uSet, const uint8_t uBinding,
 			const ppBuffer ppBuffers);
@@ -63,6 +58,8 @@ namespace XSVK
 		using vVkDescriptorSet = std::vector<VkDescriptorSet>;
 		using vVkDescriptorSetLayoutBinding = std::vector<VkDescriptorSetLayoutBinding>;
 		using vvVkDescriptorSetLayoutBinding = std::vector<vVkDescriptorSetLayoutBinding>;
+		using vuint8 = std::vector<uint8_t>;
+		using vvuint8 = std::vector<vuint8>;
 
 		VkDescriptorPool				m_VkDescPool;
 
@@ -70,6 +67,8 @@ namespace XSVK
 		vVkDescriptorSet				m_vVkDescSets;
 
 		vvVkDescriptorSetLayoutBinding	m_vvVkBindings;
+
+		vvuint8							m_vvBindingMaps;
 
 		const VkDevice	m_pVkDevice;
 	};

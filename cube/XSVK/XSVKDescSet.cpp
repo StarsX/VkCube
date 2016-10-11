@@ -13,11 +13,16 @@ DescSet::DescSet(const VkDevice pVkDevice, const uint8_t uNumSet) :
 	m_VkDescPool(VK_NULL_HANDLE),
 	m_vVkDescLayouts(0),
 	m_vVkDescSets(0),
-	m_vvVkBindings(uNumSet)
+	m_vvVkBindings(uNumSet),
+	m_vvBindingMaps(uNumSet)
 {
 	m_vvVkBindings.shrink_to_fit();
+	m_vvBindingMaps.shrink_to_fit();
 	if (uNumSet > 0ui8)
+	{
 		assert(m_vvVkBindings.data());
+		assert(m_vvBindingMaps.data());
+	}
 }
 
 DescSet::~DescSet()
@@ -27,6 +32,13 @@ DescSet::~DescSet()
 
 void DescSet::Create()
 {
+	m_vvVkBindings.shrink_to_fit();
+	m_vvBindingMaps.shrink_to_fit();
+	for (auto &vVkBindings : m_vvVkBindings)
+		vVkBindings.shrink_to_fit();
+	for (auto &vVkBindingMaps : m_vvBindingMaps)
+		vVkBindingMaps.shrink_to_fit();
+
 	CreateDescPool();
 	CreateDescLayouts();
 	CreateDescSets();
@@ -114,31 +126,29 @@ void DescSet::Reset()
 	m_vvVkBindings.clear();
 }
 
-void DescSet::SetNumBindings(const uint8_t uSet, const uint8_t uNum)
-{
-	if (uint8_t(m_vvVkBindings.size()) < uSet + 1ui8)
-		m_vvVkBindings.resize(uSet + 1);
-
-	m_vvVkBindings[uSet].resize(uNum);
-	m_vvVkBindings[uSet].shrink_to_fit();
-	assert(m_vvVkBindings[uSet].data());
-}
-
 void DescSet::AttachBindings(const uint8_t uSet, const uint8_t uNum,
 	const VkDescriptorType vkType, const VkShaderStageFlags vkStage,
 	const bool bSeparate)
 {
 	if (uint8_t(m_vvVkBindings.size()) < uSet + 1ui8)
+	{
 		m_vvVkBindings.resize(uSet + 1);
+		assert(m_vvVkBindings.data());
+		m_vvBindingMaps.resize(uSet + 1);
+		assert(m_vvBindingMaps.data());
+	}
 
 	const auto uNumBinding = bSeparate ? uNum : 1u;
 	const auto uNumDesc = bSeparate ? 1u : uNum;
 
 	for (auto i = 0ui8; i < uNumBinding; ++i)
 	{
-		const auto &vkLastBinding = m_vvVkBindings[uSet].back();
-		const auto uBinding = m_vvVkBindings[uSet].size() > 0 ?
-			vkLastBinding.binding + vkLastBinding.descriptorCount : 0u;
+		auto uBinding = 0u;
+		if (m_vvVkBindings[uSet].size() > 0)
+		{
+			const auto &vkLastBinding = m_vvVkBindings[uSet].back();
+			uBinding = vkLastBinding.binding + vkLastBinding.descriptorCount;
+		}
 
 		const auto vkBinding = VkDescriptorSetLayoutBinding
 		{
@@ -150,31 +160,18 @@ void DescSet::AttachBindings(const uint8_t uSet, const uint8_t uNum,
 		};
 		m_vvVkBindings[uSet].push_back(vkBinding);
 		assert(m_vvVkBindings[uSet].data());
+
+		m_vvBindingMaps[uSet].resize(m_vvBindingMaps[uSet].size() + uNumDesc);
+		assert(m_vvBindingMaps[uSet].data());
+		m_vvBindingMaps[uSet][uBinding] = uint8_t(m_vvVkBindings[uSet].size() - 1);
 	}
 }
 
-void XSVK::DescSet::SetBindings(const uint8_t uSet, const uint8_t uStart,
-	const uint8_t uNum, const VkDescriptorType vkType,
-	const VkShaderStageFlags vkStage, const bool bSeparate)
-{
-	const auto uNumBinding = bSeparate ? uNum : 1u;
-	const auto uNumDesc = bSeparate ? 1u : uNum;
-
-	for (auto i = 0ui8; i < uNumBinding; ++i)
-	{
-		const auto uBinding = uStart + i;
-		m_vvVkBindings[uSet][uBinding].binding = uBinding;
-		m_vvVkBindings[uSet][uBinding].descriptorType = vkType;
-		m_vvVkBindings[uSet][uBinding].descriptorCount = uNumDesc;
-		m_vvVkBindings[uSet][uBinding].stageFlags = vkStage;
-		m_vvVkBindings[uSet][uBinding].pImmutableSamplers = nullptr;
-	}
-}
-
-void XSVK::DescSet::SetBuffers(const uint8_t uSet, const uint8_t uBinding,
+void DescSet::SetBuffers(const uint8_t uSet, const uint8_t uBinding,
 	const ppBuffer ppBuffers)
 {
-	const auto &uNum = m_vvVkBindings[uSet][uBinding].descriptorCount;
+	const auto uIdx = m_vvBindingMaps[uSet][uBinding];
+	const auto &uNum = m_vvVkBindings[uSet][uIdx].descriptorCount;
 
 	vector<VkDescriptorBufferInfo> vBufferDescs(uNum);
 	assert(vBufferDescs.data());
@@ -187,20 +184,20 @@ void XSVK::DescSet::SetBuffers(const uint8_t uSet, const uint8_t uBinding,
 	write.dstSet = m_vVkDescSets[uSet];
 	write.dstBinding = uBinding;
 	write.descriptorCount = uNum;
-	write.descriptorType = m_vvVkBindings[uSet][uBinding].descriptorType;
+	write.descriptorType = m_vvVkBindings[uSet][uIdx].descriptorType;
 	write.pBufferInfo = vBufferDescs.data();
 	
 	vkUpdateDescriptorSets(m_pVkDevice, 1u, &write, 0u, nullptr);
 }
 
-void XSVK::DescSet::SetBuffers(const uint8_t uSet, const uint8_t uStart,
+void DescSet::SetBuffers(const uint8_t uSet, const uint8_t uStart,
 	const uint8_t uCount, const ppBuffer ppBuffers)
 {
 	vector<vector<VkDescriptorBufferInfo>> vvBufferDescs(0);
 	vector<VkWriteDescriptorSet> vWrites(0);
 	auto uBase = 0ui8;
 
-	for (auto i = uStart; uBase < uCount; ++i)
+	for (auto i = m_vvBindingMaps[uSet][uStart]; uBase < uCount; ++i)
 	{
 		const auto &uNum = m_vvVkBindings[uSet][i].descriptorCount;
 		assert(uBase + uNum <= uCount);
@@ -216,7 +213,7 @@ void XSVK::DescSet::SetBuffers(const uint8_t uSet, const uint8_t uStart,
 		memset(&write, 0, sizeof(write));
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		write.dstSet = m_vVkDescSets[uSet];
-		write.dstBinding = i;
+		write.dstBinding = m_vvVkBindings[uSet][i].binding;
 		write.descriptorCount = uNum;
 		write.descriptorType = m_vvVkBindings[uSet][i].descriptorType;
 		write.pBufferInfo = vBufferDescs.data();
@@ -231,7 +228,8 @@ void XSVK::DescSet::SetBuffers(const uint8_t uSet, const uint8_t uStart,
 void DescSet::SetTextures(const uint8_t uSet, const uint8_t uBinding,
 	const ppTexture ppTextures)
 {
-	const auto &uNum = m_vvVkBindings[uSet][uBinding].descriptorCount;
+	const auto uIdx = m_vvBindingMaps[uSet][uBinding];
+	const auto &uNum = m_vvVkBindings[uSet][uIdx].descriptorCount;
 
 	vector<VkDescriptorImageInfo> vTexDescs(uNum);
 	assert(vTexDescs.data());
@@ -244,7 +242,7 @@ void DescSet::SetTextures(const uint8_t uSet, const uint8_t uBinding,
 	write.dstSet = m_vVkDescSets[uSet];
 	write.dstBinding = uBinding;
 	write.descriptorCount = uNum;
-	write.descriptorType = m_vvVkBindings[uSet][uBinding].descriptorType;
+	write.descriptorType = m_vvVkBindings[uSet][uIdx].descriptorType;
 	write.pImageInfo = vTexDescs.data();
 	
 	vkUpdateDescriptorSets(m_pVkDevice, 1u, &write, 0u, nullptr);
@@ -253,7 +251,8 @@ void DescSet::SetTextures(const uint8_t uSet, const uint8_t uBinding,
 void DescSet::SetTextures(const uint8_t uSet, const uint8_t uBinding,
 	const ppImage ppTextures)
 {
-	const auto &uNum = m_vvVkBindings[uSet][uBinding].descriptorCount;
+	const auto uIdx = m_vvBindingMaps[uSet][uBinding];
+	const auto &uNum = m_vvVkBindings[uSet][uIdx].descriptorCount;
 
 	vector<VkDescriptorImageInfo> vTexDescs(uNum);
 	assert(vTexDescs.data());
@@ -266,7 +265,7 @@ void DescSet::SetTextures(const uint8_t uSet, const uint8_t uBinding,
 	write.dstSet = m_vVkDescSets[uSet];
 	write.dstBinding = uBinding;
 	write.descriptorCount = uNum;
-	write.descriptorType = m_vvVkBindings[uSet][uBinding].descriptorType;
+	write.descriptorType = m_vvVkBindings[uSet][uIdx].descriptorType;
 	write.pImageInfo = vTexDescs.data();
 	
 	vkUpdateDescriptorSets(m_pVkDevice, 1u, &write, 0u, nullptr);
@@ -279,7 +278,7 @@ void DescSet::SetTextures(const uint8_t uSet, const uint8_t uStart,
 	vector<VkWriteDescriptorSet> vWrites(0);
 	auto uBase = 0ui8;
 
-	for (auto i = uStart; uBase < uCount; ++i)
+	for (auto i = m_vvBindingMaps[uSet][uStart]; uBase < uCount; ++i)
 	{
 		const auto &uNum = m_vvVkBindings[uSet][i].descriptorCount;
 		assert(uBase + uNum <= uCount);
@@ -295,7 +294,7 @@ void DescSet::SetTextures(const uint8_t uSet, const uint8_t uStart,
 		memset(&write, 0, sizeof(write));
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		write.dstSet = m_vVkDescSets[uSet];
-		write.dstBinding = i;
+		write.dstBinding = m_vvVkBindings[uSet][i].binding;
 		write.descriptorCount = uNum;
 		write.descriptorType = m_vvVkBindings[uSet][i].descriptorType;
 		write.pImageInfo = vTexDescs.data();
@@ -314,7 +313,7 @@ void DescSet::SetTextures(const uint8_t uSet, const uint8_t uStart,
 	vector<VkWriteDescriptorSet> vWrites(0);
 	auto uBase = 0ui8;
 
-	for (auto i = uStart; uBase < uCount; ++i)
+	for (auto i = m_vvBindingMaps[uSet][uStart]; uBase < uCount; ++i)
 	{
 		const auto &uNum = m_vvVkBindings[uSet][i].descriptorCount;
 		assert(uBase + uNum <= uCount);
@@ -330,7 +329,7 @@ void DescSet::SetTextures(const uint8_t uSet, const uint8_t uStart,
 		memset(&write, 0, sizeof(write));
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		write.dstSet = m_vVkDescSets[uSet];
-		write.dstBinding = i;
+		write.dstBinding = m_vvVkBindings[uSet][i].binding;
 		write.descriptorCount = uNum;
 		write.descriptorType = m_vvVkBindings[uSet][i].descriptorType;
 		write.pImageInfo = vTexDescs.data();
