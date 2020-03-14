@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -21,32 +21,32 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0CC7DCB2-278A-4DD8-AAE1-F8953BE63FAA}</ProjectGuid>
     <RootNamespace>VSMetaball</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -81,7 +81,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>vulkan-1.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Source\lib32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\lib32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>"$(VK_SDK_PATH)\Bin32\glslangValidator.exe" -s -V -o "$(OutDir)BasePass-vert.spv" "$(ProjectDir)BasePass.vert"
@@ -104,7 +104,7 @@ xcopy "$(ProjectDir)lunarg.ppm" "$(OutDir)" /Y
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>vulkan-1.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Source\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>"$(VK_SDK_PATH)\Bin\glslangValidator.exe" -s -V -o "$(OutDir)BasePass-vert.spv" "$(ProjectDir)BasePass.vert"
@@ -130,11 +130,12 @@ xcopy "$(ProjectDir)lunarg.ppm" "$(OutDir)" /Y</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>vulkan-1.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Source\lib32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\lib32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)lunarg.ppm" "$(OutDir)" /Y
-xcopy "$(ProjectDir)lunarg.pfm" "$(OutDir)" /Y</Command>
+      <Command>xcopy "$(ProjectDir)lunarg.ppm" "$(ProjectDir)..\Bin" /Y
+xcopy "$(OutDir)*.spv" "$(ProjectDir)..\Bin" /Y
+xcopy "$(OutDir)*.exe" "$(ProjectDir)..\Bin" /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -153,11 +154,12 @@ xcopy "$(ProjectDir)lunarg.pfm" "$(OutDir)" /Y</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>vulkan-1.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\Source\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VK_SDK_PATH)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)lunarg.ppm" "$(OutDir)" /Y
-xcopy "$(ProjectDir)lunarg.pfm" "$(OutDir)" /Y</Command>
+      <Command>xcopy "$(ProjectDir)lunarg.ppm" "$(ProjectDir)..\Bin" /Y
+xcopy "$(OutDir)*.spv" "$(ProjectDir)..\Bin" /Y
+xcopy "$(OutDir)*.exe" "$(ProjectDir)..\Bin" /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -180,21 +182,21 @@ xcopy "$(ProjectDir)lunarg.pfm" "$(OutDir)" /Y</Command>
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(VK_SDK_PATH)\Bin32\glslangValidator.exe" -V -o "$(OutDir)FS%(Filename).spv" "$(ProjectDir)%(Filename).frag"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)FS%(Filename).spv</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(VK_SDK_PATH)\Bin32\glslangValidator.exe" -V -o "$(OutDir)FS%(Filename).spv" "$(ProjectDir)%(Filename).frag"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(VK_SDK_PATH)\Bin\glslangValidator.exe" -V -o "$(OutDir)FS%(Filename).spv" "$(ProjectDir)%(Filename).frag"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)FS%(Filename).spv</Outputs>
     </CustomBuild>
     <CustomBuild Include="BasePass.vert">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(VK_SDK_PATH)\Bin32\glslangValidator.exe" -V -o "$(OutDir)VS%(Filename).spv" "$(ProjectDir)%(Filename).vert"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)VS%(Filename).spv</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(VK_SDK_PATH)\Bin32\glslangValidator.exe" -V -o "$(OutDir)VS%(Filename).spv" "$(ProjectDir)%(Filename).vert"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(VK_SDK_PATH)\Bin\glslangValidator.exe" -V -o "$(OutDir)VS%(Filename).spv" "$(ProjectDir)%(Filename).vert"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)VS%(Filename).spv</Outputs>
     </CustomBuild>
     <CustomBuild Include="Illuminate.frag">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(VK_SDK_PATH)\Bin32\glslangValidator.exe" -V -o "$(OutDir)FS%(Filename).spv" "$(ProjectDir)%(Filename).frag"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)FS%(Filename).spv</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(VK_SDK_PATH)\Bin32\glslangValidator.exe" -V -o "$(OutDir)FS%(Filename).spv" "$(ProjectDir)%(Filename).frag"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(VK_SDK_PATH)\Bin\glslangValidator.exe" -V -o "$(OutDir)FS%(Filename).spv" "$(ProjectDir)%(Filename).frag"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)FS%(Filename).spv</Outputs>
     </CustomBuild>
     <None Include="lunarg.ppm" />
@@ -202,7 +204,7 @@ xcopy "$(ProjectDir)lunarg.pfm" "$(OutDir)" /Y</Command>
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(VK_SDK_PATH)\Bin32\glslangValidator.exe" -V -o "$(OutDir)VS%(Filename).spv" "$(ProjectDir)%(Filename).vert"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)VS%(Filename).spv</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(VK_SDK_PATH)\Bin32\glslangValidator.exe" -V -o "$(OutDir)VS%(Filename).spv" "$(ProjectDir)%(Filename).vert"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(VK_SDK_PATH)\Bin\glslangValidator.exe" -V -o "$(OutDir)VS%(Filename).spv" "$(ProjectDir)%(Filename).vert"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)VS%(Filename).spv</Outputs>
     </CustomBuild>
   </ItemGroup>

@@ -10,15 +10,13 @@ layout (location = 0) in vec3 wpos;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 texcoord;
 
-layout (location = 0) out vec4 uFragColor[2];
+layout (location = 0) out vec4 fragColor[2];
 
-//layout (set = 0, binding = 1) uniform sampler2D tex;
 layout (set = 1, binding = 0) uniform sampler samp;
 layout (set = 2, binding = 0) uniform texture2D tex;
 
 void main()
 {
-	//uFragColor[0] = texture(tex, texcoord);
-	uFragColor[0] = texture(sampler2D(tex, samp), texcoord);
-	uFragColor[1] = vec4(normalize(normal) * 0.5 + 0.5, 1.0);
+	fragColor[0] = texture(sampler2D(tex, samp), texcoord);
+	fragColor[1] = vec4(normalize(normal) * 0.5 + 0.5, 1.0);
 }

@@ -16,10 +16,10 @@ layout (location = 2) out vec2 texcoord;
 
 layout(set = 0, binding = 0) uniform buf
 {
-	mat4 MVP;
-	mat4 Model;
-	mat3 Normal;
-} ubuf;
+	mat4 g_modelViewProj;
+	mat4 g_model;
+	mat3 g_normal;
+};
 
 out gl_PerVertex
 {
@@ -28,9 +28,9 @@ out gl_PerVertex
 
 void main() 
 {
-	wpos = (ubuf.Model * pos).xyz;
-	normal = normalize(ubuf.Normal * nrm);
+	wpos = (g_model * pos).xyz;
+	normal = normalize(g_normal * nrm);
 	texcoord = tex.xy;
 
-	gl_Position = ubuf.MVP * pos;
+	gl_Position = g_modelViewProj * pos;
 }

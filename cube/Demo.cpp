@@ -25,7 +25,7 @@ enum DescSetIndex : uint8_t
 	NUM_DESC_SET
 };
 
-static char *g_txFiles[] = { "lunarg.pfm" };
+static char *g_txFiles[] = { "lunarg.ppm" };
 
 static const float g_vertex_buffer_data[] =
 {
@@ -745,7 +745,7 @@ void Demo::createFramebuffers()
 		m_vpFramebuffers[i] = make_unique<Framebuffer>(m_pContext->GetDevice());
 		assert(m_vpFramebuffers[i]);
 		m_vpFramebuffers[i]->SetDimensions(m_uWidth, m_uHeight);
-		m_vpFramebuffers[i]->SetRenderPass(m_ppRenderPasses[SHADE_PASS]->Get());
+		m_vpFramebuffers[i]->SetRenderPass(m_ppRenderPasses[1]->Get());
 		m_vpFramebuffers[i]->AttachColorBuffer(vpBuffers[i]);
 		m_vpFramebuffers[i]->Create();
 	}
